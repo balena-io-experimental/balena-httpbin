@@ -1,0 +1,12 @@
+# vim: ft=Dockerfile
+FROM balenalib/%%RESIN_MACHINE_NAME%%-ubuntu-python:3
+EXPOSE 80
+
+RUN apt-get update -q \
+    && apt-get install -qy build-essential libffi-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY --from=kennethreitz/httpbin /httpbin /httpbin
+RUN pip3 install --no-cache-dir gunicorn /httpbin
+
+CMD ["gunicorn", "-b", "0.0.0.0:80", "httpbin:app", "-k", "gevent"]
